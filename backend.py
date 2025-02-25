@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
-import uvicorn  # Импортируем uvicorn для запуска сервера
+import uvicorn
 
 app = FastAPI()
 
@@ -8,9 +8,9 @@ app = FastAPI()
 async def log_requests(request: Request, call_next):
     """
     Middleware для логирования всех входящих запросов.
-    Выводит информацию о запросе в консоль на русском языке.
+    Выводит информацию о запросе в консоль.
     """
-    print(f"Получен запрос {request.method} для {request.url}")
+    print(f"\nПолучен запрос {request.method} для {request.url}")
     print(f"Заголовки: {request.headers}")
     
     response = await call_next(request)
@@ -23,7 +23,9 @@ async def handle_get_request(request: Request, full_path: str):
     Если имя пользователя не передано (например, пользователь не аутентифицирован),
     возвращается пустая страница.
     """
-    user_name = request.headers.get("X-Forwarded-User", "Неизвестный пользователь")
+    user_name = request.headers.get("x-forwarded-user", "Неизвестный пользователь")
+    print(f"Пользователь: {user_name}")
+    
     html_content = f"""
     <html>
         <head>
@@ -32,6 +34,7 @@ async def handle_get_request(request: Request, full_path: str):
         <body>
             <h1>Привет, {user_name}!</h1>
             <p>Это сервер backend.</p>
+            <a href="/hub/logout">>Logout</a>
         </body>
     </html>
     """

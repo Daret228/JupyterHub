@@ -3,6 +3,7 @@ import socket
 import sys
 from subprocess import Popen
 from jupyterhub.spawner import LocalProcessSpawner
+from jupyterhub.auth import PAMAuthenticator
 
 # Добавляем текущую директорию в путь для поиска модулей
 sys.path.append(os.getcwd())
@@ -65,8 +66,11 @@ c.JupyterHub.port = 8000  # Порт для JupyterHub
 # Указываем JupyterHub использовать наш кастомный Spawner
 c.JupyterHub.spawner_class = PythonServerSpawner
 
-# Разрешаем аутентификацию для всех пользователей (без пароля)
+
+# Админы
+c.Authenticator.admin_users = {'admin'}
 c.Authenticator.allow_all = True
 
-# Используем PAM аутентификацию
-c.JupyterHub.authenticator_class = 'pam'
+c.JupyterHub.authenticator_class = 'dummy'
+
+
