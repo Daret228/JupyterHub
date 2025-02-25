@@ -4,6 +4,7 @@ from fastapi.responses import Response
 import httpx 
 import uvicorn 
 import os  
+import re
 
 # Создаем экземпляр приложения FastAPI
 app = FastAPI()
@@ -21,9 +22,15 @@ async def get_user_info():
     try:
         # Получаем имя пользователя из переменной окружения
         username = os.getenv("USER_NAME")  
+        
         if username:
             print(f"Имя пользователя: {username}")
-            return username
+            # Проверка на латинсике и цифры
+            if re.fullmatch(r'^[a-zA-Z0-9_-]+$', username):
+                return username
+            else:
+                print('Неверный формат имени пользователя')
+                return None
         else:
             print("Имя пользователя не установлено.")
             return None
@@ -63,14 +70,14 @@ async def proxy_requests(request: Request, call_next):
     # Проверяем аутентификацию пользователя
     is_authenticated = await check_authentication(request)
     if not is_authenticated:
-        # Если аутентификация не прошла, возвращаем ошибку 401 Unauthorized 1
-        return Response(status_code=401, content="Unauthorized 1")
+        # Если аутентификация не прошла, возвращаем ошибку 401
+        return Response(status_code=401, content="Authorization failed")
 
     # Проверяем получение имени пользователя
     user_name = await get_user_info()
     if not user_name:
-        # Если имя пользователя не определено, возвращаем ошибку 401 Unauthorized 2
-        return Response(status_code=401, content="Unauthorized 2")
+        # Если имя пользователя не определено, возвращаем ошибку 401 
+        return Response(status_code=401, content="Couldn't get the correct name")
 
     try:
         # Проксируем запрос на backend-сервер
@@ -78,7 +85,8 @@ async def proxy_requests(request: Request, call_next):
             backend_response = await client.request(
                 method=request.method,
                 url=f"{BACKEND_URL}{request.url.path}", 
-                headers={**request.headers, "X-Forwarded-User": user_name}, # Добавляем заголовок с именем пользователя
+                # Добавляем заголовок с именем пользователя
+                headers={**request.headers, "X-Forwarded-User": user_name},
                 content=await request.body()
             )
 
