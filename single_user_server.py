@@ -2,17 +2,25 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.responses import Response
 import httpx 
 import uvicorn
+import os
 
 app = FastAPI()
 
 BACKEND_URL = "http://localhost:8003"
 JUPYTERHUB_URL = "http://localhost:8000/hub/api"
 
-async def get_user_info(request: Request):
+async def get_user_info():
     """
     Проверяет аутентификацию пользователя и получает его имя из JupyterHub API.
     Возвращает имя пользователя или None.
     """
+    username = os.getenv("USER_NAME")
+    if username:
+        print(f"Имя пользователя: {username}")
+        return username
+    else:
+        print("Имя пользователя не установлено.")
+    
     return "GG" 
 
     headers = request.headers
@@ -69,7 +77,7 @@ async def proxy_requests(request: Request, call_next):
         return Response(status_code=401, content="Unauthorized 1")
     
     # Получаем имя пользователя
-    user_name = await get_user_info(request)
+    user_name = await get_user_info()
     
     if not user_name:
         return Response(status_code=401, content="Unauthorized 2")

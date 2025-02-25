@@ -14,6 +14,10 @@ c = get_config()
 # Создаем кастомный Spawner для запуска single-user сервера (FastAPI) на динамическом порту
 class PythonServerSpawner(LocalProcessSpawner):
     async def start(self):
+        
+        # Передаем имя пользователя через переменную окружения
+        env = dict(os.environ, USER_NAME=self.user.name)
+        
         # Создаем сокет для поиска свободного порта
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind(('', 0))  # Привязываемся к случайному порту
@@ -27,7 +31,8 @@ class PythonServerSpawner(LocalProcessSpawner):
                     "single_user_server:app", 
                     "--host", "127.0.0.1", 
                     "--port", str(port)
-                ]
+                ],
+                env=env  # Передаем изменённое окружение
             )
         except Exception as e:
             # Логируем ошибку, если что-то пошло не так

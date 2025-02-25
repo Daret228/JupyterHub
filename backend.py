@@ -34,7 +34,10 @@ async def handle_get_request(request: Request, full_path: str):
         <body>
             <h1>Привет, {user_name}!</h1>
             <p>Это сервер backend.</p>
-            <a href="/hub/logout">>Logout</a>
+            <a href="/hub/logout">LOGOUT</a>
+            <a href="/hub/home">HOME</a>
+            <a href="/hub/api/user">SETTINGS</a>
+            
         </body>
     </html>
     """
